@@ -1,0 +1,107 @@
+library(tidyverse)
+library(wqr)
+library(kableExtra)
+library(rmarkdown)
+library(knitr)
+library(lubridate)
+library(stringr)
+
+df <- data.frame(read.csv("P:\\users\\Dante Falcone\\R\\Projects\\Projects\\Chemical Intake\\Chemical List.csv", 
+                    col.names = c("company", "chemical"))) %>% filter(chemical != "")
+
+intake_chem_count <- df %>% group_by(chemical) %>% 
+  summarise(count = n()) %>% arrange(desc(count))
+
+ha <- data.frame(read.csv("P:\\users\\Dante Falcone\\R\\Projects\\Projects\\Chemical Intake\\EPA Health Advisories.csv"))
+
+# df1 <- ha %>% filter(grepl("*cumene*", Chemicals))
+
+
+chemicals <- unique(df$chemical) #list of chemicals provided by companies
+
+ha_chemicals <- ha$Chemicals #chemical names listed under EPA Health advisories
+
+chem_comp <- read.csv("matched2.csv") %>% filter(!is.na(chemical_composition)) %>% mutate(chemical_composition = gsub("[()]", "", chemical_composition)) %>% 
+  separate(chemical_composition,
+           into = c("chem1", "chem2", "chem3", "chem4", "chem5", "chem6", "chem7","chem8", "chem9", "chem10", "chem11", "chem12", "chem13", "chem14"),
+           sep = ",")
+#list of components of all non matched chemicals(partial or exact matches between ha_chemicals and chemicals)
+
+
+
+# matchmaker <- function(x,y){
+# df <- data.frame(chem_name = character(),
+#                  matches = character())
+#   for (i in x) {
+#     assign(paste0("row",i), data.frame(chem_name = i,
+#       matches = toString(y[grepl(paste("*",i,"*", sep = ""), y)])))
+#     df <- df %>%  rbind(get(paste0("row", i)))
+#   }
+#   
+#   print(df)
+# }
+
+#matchmaker function: analyzes two vector and creates a data frame with two columns. The function will take each instance of x and find instances of y where there are any partial matches. 
+# function then creates a two column data frame with each x instance in one column and its corresponding matches in the second column. 
+
+matchmaker <- function(x,y){
+  df <- data.frame(chem_name = character(),
+                   matches = character())
+  for (i in x) {
+    assign(paste0("row",i), data.frame(chem_name = i,
+                                       matches = toString(y[str_detect(str_to_lower(y), str_to_lower(paste0(i, sep = "")))])))
+    df <- df %>%  rbind(get(paste0("row", i)))
+  }
+  
+  print(df)
+}
+
+table_binder <- function(x,y){
+  matched1 <- matchmaker(x, y) %>% filter(matches != "")%>% separate_rows(matches, sep = ", ")%>% rename(intake_chemicals = "chem_name", HA_Chemicals = "matches")
+  
+  matched2 <- matchmaker(x, y) %>% filter(matches != "") %>% separate_rows(matches, sep = ", ") %>% rename(HA_Chemicals = "chem_name", intake_chemicals = "matches")
+  
+  matched <- rbind(matched1, matched2) %>% distinct() %>% select(HA_Chemicals, intake_chemicals)
+  
+  matched <- merge(matched, ha, by.x = "HA_Chemicals", by.y = "Chemicals" )
+}
+
+matched_i <- table_binder(ha_chemicals, chemicals)
+
+# for (i in c(1:14)){
+#   assign(paste0("chem", i), chem_comp[i+3])
+#   get(paste0("chem", i))
+# }
+
+for (i in c(1:14)){
+   assign(paste0("matched",i), table_binder(ha_chemicals, get(paste0("chem", i))))
+}
+
+# matched1 <- matchmaker(chemicals, ha_chemicals) %>% filter(matches != "")%>% separate_rows(matches, sep = ", ")%>% rename(intake_chemicals = "chem_name", HA_Chemicals = "matches")
+# 
+# matched2 <- matchmaker(ha_chemicals, chemicals) %>% filter(matches != "") %>% separate_rows(matches, sep = ", ") %>% rename(HA_Chemicals = "chem_name", intake_chemicals = "matches")
+# 
+# matched <- rbind(matched1, matched2) %>% distinct() %>% select(HA_Chemicals, intake_chemicals)
+# 
+# matched <- merge(matched, ha, by.x = "HA_Chemicals", by.y = "Chemicals" )
+
+
+
+
+
+#Chemical Count----------
+
+chemcount1 <- df %>% group_by(chemical) %>% 
+  summarise(count = n()) %>% arrange(desc(count))
+
+matched_intake_chemicals <- setdiff(chemicals, matched$intake_chemicals)
+
+matched_chems <- matched$intake_chemicals
+unmatched_chems <- setdiff(chemcount1$chemical, matched_chems)
+
+chemcount2 <- chemcount1 %>% filter(chemical %in% unmatched_chems)
+
+#csv-------
+# write.csv(chemcount2, file = "unique_chemicals.csv")
+# 
+# write.csv(matched, file = "matched.csv")

@@ -1,0 +1,61 @@
+# library(tidyverse)
+# library(wqr)
+# library(kableExtra)
+# library(rmarkdown)
+# library(knitr)
+# library(lubridate)
+# library(stringr)
+# library(blastula)
+
+
+source("variables.R")
+source("fn1.R")
+source("variable_assignment.R")
+source("nit.R")
+source("cl2_col.R")
+source("vcs.R")
+source("dbps.R")
+source("secondaries.R")
+source("TOC.R")
+source("Metals.R")
+source("VOCs.R")
+source("pH_Ortho.R")
+
+table_generator <- function(x,y,z) {
+  if(z %in% c("Nitrite", "Nitrate")) {
+    df3 <- table_generator_nit(x,y,z)
+  }else{
+    if(z %in% c("Field-Chlorine Residual Total", "Coliforms Total (Colilert)")){
+      df3 <- table_generator_cl2_col(x,y,z)
+    } else {
+      if(z == "Violation Check Samples") {
+        df3 <- table_generator_vcs(x,y,z)
+      } else{
+        if(z =="THMs" | z ==  "HAAs"){
+          df3 <- table_generator_dbps(x,y,z)
+        } else {
+          if(z == "Secondaries" | z %in% secondaries){
+            df3 <- table_generator_sec(x,y,z)
+          } else{
+            if(z == "TOC & Alkalinity" | z %in% c("TOC", "Alkalinity")){
+              df3 <- table_generator_toc(x,y,z)
+            }else {
+              if(z == "Metals" | z %in% metals) {
+                df3 <- table_generator_metals(x,y,z)
+              } else{
+                if(z == "VOCs"){
+                  df3 <- table_generator_voc(x,y,z)
+                } else{
+                  if(z == "Orthophosphate & pH"){
+                    df3 <- table_generator_ortho(x,y,z)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+#quick_check <- table_generator("Quarter 4", 2021, "TOC")

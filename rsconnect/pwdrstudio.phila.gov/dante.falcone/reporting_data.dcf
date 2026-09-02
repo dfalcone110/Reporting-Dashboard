@@ -1,0 +1,13 @@
+name: reporting_data
+title: Reporting Data
+username: dante.falcone
+account: dante.falcone
+server: pwdrstudio.phila.gov
+hostUrl: https://pwdrstudio.phila.gov/__api__
+appId: 389
+bundleId: 2491
+url: https://pwdrstudio.phila.gov/content/299c6391-6393-49f2-a943-c0751c023a4f/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: check.R|VOC Parameter Names.xlsx|Archive

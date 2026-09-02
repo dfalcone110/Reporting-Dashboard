@@ -1,0 +1,39 @@
+# library(tidyverse)
+# library(wqr)
+# library(kableExtra)
+# library(rmarkdown)
+# library(knitr)
+# library(lubridate)
+# library(stringr)
+# library(blastula)
+
+
+# source("variables.R")
+# source("fn1.R")
+# source("variable_assignment.R")
+
+table_generator_dbps <- function(x,y,z) {
+  
+  #variables---------
+
+  variable_assignment(x,y,z)
+  
+  #generating Data Frame
+  df2 <- fn1(z,st, en, si, sc) %>% filter(
+    project_no == "THM_HAA Monthly"
+  ) %>% mutate(
+    Result = round(as.numeric(Result)/1000, 4)
+  )
+
+
+  df2 <- df2 %>% 
+    mutate(
+      `Loc/EPID2` = padep_id,
+    ) %>% 
+    rename(`Loc/EPID`="padep_id", `Samp #` = "lims_number", Contam = "Contam.Code", AnalMeth = "Method.Code"
+    ) %>%
+    select(site,parameter, PWSID, Transcode, Contam, AnalMeth, Result, AnalDate, `Loc/EPID`, SampDate, SampType, SampTime, LabID, `Sender ID`, `Samp #` , blank1, `Loc/EPID2`, blank2, ANALYZED_BY, VALIDATED_ON) %>%
+    mutate(across(everything(), as.character))
+  return(df2) 
+}
+# check_dbps <- table_generator_dbps("January", 2024, "HAAs")

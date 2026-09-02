@@ -1,0 +1,39 @@
+library(tidyverse)
+library(wqr)
+library(kableExtra)
+library(rmarkdown)
+library(knitr)
+library(lubridate)
+library(stringr)
+
+source("Variables.R")
+
+dist <- function(x){
+  stdate <- ymd(paste0(x, "01", "01"))
+  edate <- stdate + years(1)
+  
+  df <- read_LIMS(
+    start_date = stdate,
+    end_date = edate,
+    sample_class = c("Routine Daily", "THMs/HAAs Monthly", "Violation Check Samples"),
+    site = rtcr,
+    parameter = c("Field-Chlorine Residual Total", "Coliforms Total (Colilert)")
+  ) %>% mutate(month = month(date_time))%>% filter(!is.na(result)) %>% group_by(month) %>% summarise(
+    avg_residual = mean(result[which(parameter == "Field-Chlorine Residual Total")]),
+    count_cl2 = sum(parameter == "Field-Chlorine Residual Total"),
+    count_col = sum(parameter == "Coliforms Total (Colilert)"),
+    count_vc = sum(sample_class == "Violation Check Samples" & parameter == "Field-Chlorine Residual Total"),
+    positives = sum(parameter == "Coliforms Total (Colilert)" & result >=1),
+    percent = round((positives/count_col)*100, digits = 2)
+  )
+  return(df)
+}
+
+
+dist22 <- dist(2022)
+dist23 <- dist(2023)
+
+max(dist23$avg_residual)
+min(dist23$avg_residual)
+
+

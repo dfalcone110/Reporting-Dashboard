@@ -1,0 +1,177 @@
+#TEST
+
+library(tidyverse)
+library(wqr)
+library(kableExtra)
+library(rmarkdown)
+library(knitr)
+library(lubridate)
+library(stringr)
+library(hms)
+library(shiny)
+library(DT)
+
+years <- sort(year("1997-01-01"):year(floor_date(Sys.Date(), "year")), decreasing = T)
+
+df <- read_LIMS(
+  start_date = "1995-01-01",
+  end_date = "2023-01-01",
+  project_no = "LCR Compliance"
+)
+
+years <- sort(unique(year(df$date_time)), decreasing = T)
+
+
+#functions/variables--------------
+percentile <- function(x,y,z) {
+  liter <- ifelse(z == 1, "1rst Liter", "5th Liter");
+  df <- read_LIMS(
+    start_date = x,
+    end_date = as.Date(x)+years(1),
+    project_no = "LCR Compliance"
+  ) %>% filter(result_as_entered != "Rejected") %>% 
+    mutate(
+      result2 = ifelse(grepl("^<",result_as_entered), 0, result),
+      sample_class = ifelse(sample_class == "Lead/Copper", "1rst Liter", "5th Liter")
+    );
+  indexed_df <- df %>% filter(parameter == y,
+                              sample_class == liter) %>% 
+    arrange(result2) %>% 
+    rowid_to_column("index");
+  index_num <- round(max(indexed_df$index) * 0.9, digits = 0);
+  percentile <- indexed_df %>% filter(indexed_df$index == index_num) %>% 
+    select(index, parameter, sample_class, site, result, units);
+  print(percentile)
+  
+}
+
+
+percentile_df <- function(x,y,z) {
+  liter <- ifelse(z == 1, "1rst Liter", "5th Liter");
+  df <- read_LIMS(
+    start_date = x,
+    end_date = as.Date(x)+years(1),
+    project_no = "LCR Compliance"
+  )%>% filter(result_as_entered != "Rejected")%>% 
+    mutate(
+      result2 = ifelse(grepl("^<",result_as_entered), 0, result),
+      sample_class = ifelse(sample_class == "Lead/Copper", "1rst Liter", "5th Liter")
+    );
+  indexed_df <- df %>% filter(parameter == y,
+                              sample_class == liter) %>% 
+    arrange(result2) %>% 
+    rowid_to_column("index");
+  indexed_df <- indexed_df %>% select(index, parameter, sample_class, site, result_as_entered, units)
+  index_num <- round(max(indexed_df$index) * 0.9, digits = 0);
+  indexed_df <- DT::datatable(indexed_df, options = list(pageLength = 200))
+  
+  indexed_df <- if(y == "Lead") {indexed_df%>% formatStyle(
+    'result_as_entered',
+    target = 'cell',
+    backgroundColor = styleInterval(c(.005,.010, .015), c('white', 'yellow', 'orange', 'red'))
+  ) %>% formatStyle(
+    'index',
+    target = 'row',
+    backgroundColor = styleEqual(index_num, 'lightgreen')) } else(
+      indexed_df %>% formatStyle(
+        'result_as_entered',
+        target = 'cell',
+        backgroundColor = styleInterval(c(1.3), c('white', 'red'))
+      ) %>% formatStyle(
+        'index',
+        target = 'row',
+        backgroundColor = styleEqual(index_num, 'lightgreen'))
+    )
+  
+  indexed_df
+  
+}
+
+
+# Define UI--------
+ui <- fluidPage(
+  tabsetPanel(
+  #tab1-----
+  tabPanel("90th Percentile Calculations", fluid = TRUE,
+           titlePanel("90th Percentile Calculations"),
+           fluidRow(
+             selectInput("year",
+                         label = "Year",
+                         choices = years
+             )
+             
+           ),
+           fluidRow(
+             column(3,
+                    DTOutput("pbliter1_90th")
+             ),
+             column(3,
+                      DTOutput("pbliter5_90th")
+                    ),
+             column(3,
+                    DTOutput("culiter1_90th")
+                    ),
+             column(3,
+                    DTOutput("culiter5_90th"))
+           ),
+           fluidRow(
+             column(3,
+                    DTOutput("pbliter1")
+                    ),
+             column(3,
+                    DTOutput("pbliter5")),
+             column(3,
+                    DTOutput("culiter1")),
+             column(3,
+                    DTOutput("culiter5"))
+             
+           )
+  )
+  )
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output, session) {
+  
+#pb liter 1----
+  output$pbliter1_90th <- renderDT(
+    pbliter1 <- percentile(paste0(input$year,"-01-01"), "Lead", 1)
+  )
+
+  output$pbliter1 <- renderDT(
+  pbliter1 <- percentile_df(paste0(input$year,"-01-01"), "Lead", 1)
+  )
+  
+  
+
+#pb liter 5----
+  output$pbliter5_90th <- renderDT({
+    pbliter1 <- percentile(paste0(input$year,"-01-01"), "Lead", 5)
+  })
+  
+  output$pbliter5 <-renderDT({
+    pbliter5 <- percentile_df(paste0(input$year,"-01-01"), "Lead", 5)
+  })
+  
+#cu liter 1-----
+  output$culiter1_90th <- renderDT({
+    pbliter1 <- percentile(paste0(input$year,"-01-01"), "Copper", 1)
+  })
+  
+  output$culiter1 <-renderDT({
+    culiter1 <- percentile_df(paste0(input$year,"-01-01"), "Copper", 1)
+  })
+  
+#cu liter 5-----
+  output$culiter5_90th <- renderDT({
+    pbliter1 <- percentile(paste0(input$year,"-01-01"), "Copper", 5)
+  })
+  
+  output$culiter5 <-renderDT({
+    pbliter5 <- percentile_df(paste0(input$year,"-01-01"), "Copper", 5)
+  })
+  
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)

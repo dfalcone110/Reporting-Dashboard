@@ -1,0 +1,168 @@
+source("variables.R")
+source("overarching.R")
+source("variables.R")
+source("fn1.R")
+source("variable_assignment.R")
+source("nit.R")
+source("cl2_col.R")
+source("vcs.R")
+source("dbps.R")
+source("secondaries.R")
+source("TOC.R")
+source("Metals.R")
+source("VOCs.R")
+source("pH_Ortho.R")
+
+
+#UI------
+ui <- fluidPage(
+                theme = shinythemes::shinytheme("sandstone"),
+                
+      #'           tags$head(
+      #'             tags$style(HTML("
+      #'             @import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap');
+      #' body {
+      #'   background-color: black;
+      #'   color: white;
+      #' }
+      #' h2 {
+      #'   font-family: 'Yusei Magic', sans-serif;
+      #' }
+      #' .shiny-input-container {
+      #'   color: #474747;
+      #' }"
+      #'           ))),
+      #'           
+  titlePanel("Reporting Data"),
+  
+  # tags$style(HTML("
+  # #first {
+  # outline: 3px solid black;
+  #                 }
+  #                 ")),
+  # 
+  
+               #inputs 
+               fluidRow(align = "center", style = 'height:400px;',
+                 column(3, 
+                        selectInput("parameter",
+                                    label = "Parameter",
+                                    choices = sort(c("Nitrite", "Nitrate", "Field-Chlorine Residual Total", "Coliforms Total (Colilert)", "Violation Check Samples", "HAAs", "THMs", "Secondaries", "TOC", "TOC & Alkalinity", "Metals", "VOCs", "Orthophosphate & pH")))   
+                        ),
+                 column(1,selectInput("month", 
+                                      label = "Month", 
+                                      choices = c("January","February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4"))
+                        ),
+                column(1,
+                       textInput("year", label = "Year"),
+                       ),
+               column(3,
+                      verbatimTextOutput("text", placeholder = TRUE)
+               ),
+               
+               tags$head(tags$style(HTML("
+                            #text { 
+                            title: Message Board;
+                            width: 300px;
+                            height: 200px;
+                            position: relative;
+                            }
+                            "))
+               ),
+               column(1,
+                      style = 'width:400px;overflow-x: auto;height:400px;overflow-y: auto;',
+                      tableOutput("summary"),
+                      
+                      # tags$head(tags$style(HTML("
+                      #       #summary { 
+                      #       color: white;
+                      #       }
+                      #       ")))
+               ),
+               column(1,
+                      actionButton(
+                        inputId = "Submit",
+                        label = "Submit")
+               )
+               ),
+               fluidRow(
+               column(12,
+                 DTOutput("table"),
+                 
+                 # tags$head(tags$style(HTML("
+                 #            #table { 
+                 #            color: white;
+                 #            }
+                 #            "))),
+                 
+                 downloadButton('downloadData', 'Download')
+                 )
+               )
+)
+
+
+#Server----
+server <- function(input, output, session) {
+  session$onSessionEnded(stopApp)
+
+  table <- eventReactive(input$Submit,{
+
+    req(input$month)
+    req(input$year)
+    req(input$parameter)
+    table_generator(input$month, input$year, input$parameter)
+  })
+
+
+
+    output$table <- renderDT(
+
+       table()
+
+      # table <- table_generator(input$month, input$year, input$parameter)
+      # # ,
+      # # extensions = 'Buttons',
+      # #
+      # # options = list(
+      # #   paging = FALSE,
+      # #   searching = TRUE,
+      # #   fixedColumns = TRUE,
+      # #   autoWidth = TRUE,
+      # #   ordering = TRUE,
+      # #   dom = 'tB',
+      # #   buttons = c('copy', 'csv')
+      # # ),
+      # #
+      # # class = "display"
+    )
+
+    output$summary <- renderTable(
+      table2 <- table() %>% group_by(site, `Loc/EPID`) %>% summarise(`Number of Samples` = n(),
+                                                     `Analysis.Methods` = paste(unique(AnalMeth), collapse = " ")) %>% rename("Loc.EPID" = `Loc/EPID`)
+      #figure out how to include total column
+
+    )
+
+    output$text <- renderText(
+      paste0("Total Samples Taken:", as.character(length(table()$Result)))
+    )
+
+    output$text2 <- renderText(
+      ifelse(input$parameter == "THMs", "Expecting 5 THM samples per site", "")
+    )
+
+
+
+
+
+    output$downloadData <- downloadHandler(
+      filename = function(){
+        paste0(input$month, '_', input$year,'_', input$parameter, '.csv')
+      },
+      content = function(file) {
+        write.table(table_generator(input$month, input$year, input$parameter), file, col.names = FALSE, row.names = FALSE, sep = ",")
+      }
+    )
+}
+# Run the application 
+shinyApp(ui = ui, server = server)

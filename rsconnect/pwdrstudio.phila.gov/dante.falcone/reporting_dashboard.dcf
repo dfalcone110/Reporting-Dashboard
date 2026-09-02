@@ -1,0 +1,13 @@
+name: reporting_dashboard
+title: Reporting Dashboard
+username: dante.falcone
+account: dante.falcone
+server: pwdrstudio.phila.gov
+hostUrl: https://pwdrstudio.phila.gov/__api__
+appId: 461
+bundleId:
+url: https://pwdrstudio.phila.gov/content/e6803eda-5008-4322-812d-32ab58667caf/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: VOC Parameter Names.xlsx

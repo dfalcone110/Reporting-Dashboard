@@ -1,0 +1,208 @@
+source("variables.R")
+source("overarching.R")
+source("variables.R")
+source("fn1.R")
+source("variable_assignment.R")
+source("nit.R")
+source("cl2_col.R")
+source("vcs.R")
+source("dbps.R")
+source("secondaries.R")
+source("TOC.R")
+source("Metals.R")
+source("VOCs.R")
+source("pH_Ortho.R")
+source("datacleaner.R")
+
+
+# Col1 = c(9,5,8)
+# Col2 = c(9,4,7)
+# Col3 = c(9,9,5)
+# Col4 = c(8,8,7)
+# Argu = c(7,6,7)
+# df = data.frame(Col1,Col2,Col3,Col4,Argu)
+# 
+# # Build hidden logical columns for conditional formatting
+# dataCol_df <- ncol(df) - 1
+# dataColRng <- 1:dataCol_df
+# argColRng <- (dataCol_df + 2):(dataCol_df * 2 + 1)
+# df[, argColRng] <- df[, dataColRng] < Argu
+
+#UI------
+ui <- fluidPage(
+                theme = shinythemes::shinytheme("sandstone"),
+                
+      #'           tags$head(
+      #'             tags$style(HTML("
+      #'             @import url('https://fonts.googleapis.com/css2?family=Yusei+Magic&display=swap');
+      #' body {
+      #'   background-color: black;
+      #'   color: white;
+      #' }
+      #' h2 {
+      #'   font-family: 'Yusei Magic', sans-serif;
+      #' }
+      #' .shiny-input-container {
+      #'   color: #474747;
+      #' }"
+      #'           ))),
+      #'           
+  titlePanel("Reporting Data"),
+  
+  # tags$style(HTML("
+  # #first {
+  # outline: 3px solid black;
+  #                 }
+  #                 ")),
+  # 
+  
+               #inputs 
+               fluidRow(align = "center", style = 'height:400px;',
+                 column(4, 
+                        selectInput("parameter",
+                                    label = "Parameter",
+                                    choices = sort(c("Nitrite", "Nitrate", "Field-Chlorine Residual Total", "Coliforms Total (Colilert)", "Violation Check Samples", "HAAs", "THMs", "Secondaries", "TOC", "TOC & Alkalinity", "Metals", "VOCs", "Orthophosphate & pH"))),
+                               column(1,
+                                      style = 'width:800px;overflow-x: auto;height:300px;overflow-y: auto;',
+                                      tableOutput("summary"),
+                                      
+                                      # tags$head(tags$style(HTML("
+                                      #       #summary { 
+                                      #       color: white;
+                                      #       }
+                                      #       ")))
+                               )),
+                 column(1,selectInput("month", 
+                                      label = "Month", 
+                                      choices = c("January","February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4"))
+                        ),
+                column(1,
+                       textInput("year", label = "Year"),
+                       ),
+               column(3,
+                      verbatimTextOutput("text", placeholder = TRUE)
+               ),
+               
+               tags$head(tags$style(HTML("
+                            #text { 
+                            title: Message Board;
+                            width: 350px;
+                            height: 400px;
+                            color: black;
+                            font-size: 15px;
+                            position: relative;
+                            }
+                            "))
+               ),
+               column(1,
+                      actionButton(
+                        inputId = "Submit",
+                        label = "Submit")
+               )
+               ),
+               fluidRow(
+               column(12,
+                 DTOutput("table"),
+                 
+                 #https://www.w3schools.com/css/css_font_size.asp - css basics 
+                 #tags$head(tags$style(HTML("
+                 #            #table { 
+                 #            color: white;
+                 #            }
+                 #            "))),
+                 
+                 downloadButton('downloadData', 'Download')
+                 )
+               )
+)
+
+
+#Server----
+server <- function(input, output, session) {
+  session$onSessionEnded(stopApp)
+
+  table <- eventReactive(input$Submit,{
+
+    req(input$month)
+    req(input$year)
+    req(input$parameter)
+    table_generator(input$month, input$year, input$parameter)%>% mutate(
+      contract_lab = ifelse(grepl("*ConLab*", ANALYZED_BY), TRUE, FALSE),
+      not_validated = ifelse(is.na(VALIDATED_ON), TRUE ,FALSE)
+    ) %>% subset(select=-c(VALIDATED_ON, ANALYZED_BY)) 
+  })
+
+
+    output[["table"]] <- renderDT({
+
+       df <- table()
+       df <- datatable(df) %>% formatStyle(
+         'contract_lab',
+         target = 'cell',
+         backgroundColor = styleEqual(1, 'yellow')
+       ) %>% formatStyle(
+         'not_validated',
+         target = 'cell',
+         backgroundColor = styleEqual(1, 'orange')
+       ) 
+       
+
+  #
+      # table <- table_generator(input$month, input$year, input$parameter)
+      # # ,
+      # # extensions = 'Buttons',
+      # #
+      # # options = list(
+      # #   paging = FALSE,
+      # #   searching = TRUE,
+      # #   fixedColumns = TRUE,
+      # #   autoWidth = TRUE,
+      # #   ordering = TRUE,
+      # #   dom = 'tB',
+      # #   buttons = c('copy', 'csv')
+      # # ),
+      # #
+      # # class = "display"
+    })
+
+    output$summary <- renderTable(
+      table2 <- table() %>% group_by(site, `Loc/EPID`) %>% summarise(`Number of Samples` = n(),
+                                                      `Contract Samples` = sum(grepl("*ConLab*",ANALYZED_BY)),
+                                                     `Analysis.Methods` = paste(unique(AnalMeth), collapse = " ")) %>% rename("Loc.EPID" = `Loc/EPID`)
+      #figure out how to include total column
+
+    )
+
+    output$text <- renderText(
+      paste0("Total Samples Taken:", 
+             as.character(length(df$Result)), 
+             "\n", 
+             "Samples Analyzed by Contract Lab:",
+             as.character(length(df$ANALYZED_BY[which(df$contract_lab== "true")])),
+             "\n",
+             "Samples Validated:",
+             as.character(length(df$Result[which(df$not_validated == "true")]))
+    )
+    )
+
+    # output$text2 <- renderText(
+    #   #ifelse(input$parameter == "THMs", "Expecting 5 THM samples per site", "")
+    #   #as.character(length(table()$ANALYZED_BY[which(grepl("*ConLab*",table()$ANALYZED_BY))]))
+    #   
+    # )
+
+
+
+
+
+    output$downloadData <- downloadHandler(
+      filename = function(){
+        paste0(input$month, '_', input$year,'_', input$parameter, '.csv')
+      },
+      content = function(file) {
+        write.table(table_clean(input$month, input$year, input$parameter), file, col.names = FALSE, row.names = FALSE, sep = ",")
+      }
+    )
+}
+# Run the application 
+shinyApp(ui = ui, server = server)
