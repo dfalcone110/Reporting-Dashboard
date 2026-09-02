@@ -26,9 +26,9 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
     separate(date_time, into = c("SampDate", "SampTime"), sep = " ") %>%
     separate(ANALYZED_ON, into = c("AnalDate", "AnalTime"), sep = " ")%>%  
     mutate(SampDate2 = SampDate,
-           SampDate = gsub('-','',(as.character(as.Date(SampDate, format = '%Y-%m-%d'), format = "%m-%d-%y"))),
+           SampDate = gsub('-', '', format(as.Date(SampDate, format = '%Y-%m-%d'), format = "%m-%d-%y")),
            SampTime = str_remove(gsub(":", '', SampTime),"00$"),
-           AnalDate = gsub('-','',(as.character(as.Date(AnalDate, format = '%Y-%m-%d'), format = "%m-%d-%y"))),
+           AnalDate = gsub('-', '', format(as.Date(AnalDate, format = '%Y-%m-%d'), format = "%m-%d-%y")),
            PWSID = "1510001",
            Transcode = "03",
            LLD = " ",
