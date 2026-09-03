@@ -15,6 +15,7 @@ source("pH_Ortho.R")
 source("datacleaner.R")
 source("text2output.R")
 source("FCl2vsCol.R")
+source("LCR.R")
 
 
 
@@ -31,7 +32,7 @@ theme = shinythemes::shinytheme("sandstone"),
                  sidebarPanel(width = 3,
                    selectInput("parameter",
                                label = "Parameter",
-                               choices = sort(c("Nitrite", "Nitrate", "Field-Chlorine Residual Total", "Coliforms Total (Colilert)", "Violation Check Samples", "HAAs", "THMs", "Secondaries", "TOC", "TOC & Alkalinity", "Metals", "VOCs", "Orthophosphate & pH"))),
+                               choices = sort(c("Nitrite", "Nitrate", "Field-Chlorine Residual Total", "Coliforms Total (Colilert)", "Violation Check Samples", "HAAs", "THMs", "Secondaries", "TOC", "TOC & Alkalinity", "Metals", "VOCs", "Orthophosphate & pH", "LCR"))),
                    selectInput("month", 
                                label = "Month", 
                                choices = c("January","February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4")),
