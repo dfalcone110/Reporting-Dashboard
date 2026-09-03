@@ -28,6 +28,8 @@ files = [
     "/variable_assignment.R",
     "/vcs.R",
     "/VOCs.R",
+    "/fn2.R",
+    "/LCR.R",
 ]
 validate = true
 product_type = "connect"

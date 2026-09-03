@@ -10,13 +10,14 @@ id = "b8149a1d-92f4-4417-a652-d444b75ea811"
 dashboard_url = "https://pwdrstudio.phila.gov/connect/#/apps/b8149a1d-92f4-4417-a652-d444b75ea811"
 direct_url = "https://pwdrstudio.phila.gov/content/b8149a1d-92f4-4417-a652-d444b75ea811/"
 logs_url = "https://pwdrstudio.phila.gov/connect/#/apps/b8149a1d-92f4-4417-a652-d444b75ea811/logs"
-deployed_at = "2026-09-02T14:42:41.673Z"
-bundle_id = "4681"
-bundle_url = "https://pwdrstudio.phila.gov/__api__/v1/content/b8149a1d-92f4-4417-a652-d444b75ea811/bundles/4681/download"
+deployed_at = "2026-09-03T18:57:04.392Z"
+bundle_id = "4688"
+bundle_url = "https://pwdrstudio.phila.gov/__api__/v1/content/b8149a1d-92f4-4417-a652-d444b75ea811/bundles/4688/download"
 files = [
     ".posit/publish/Reporting Dashboard-G3HL.toml",
     ".posit/publish/deployments/deployment-21C6.toml",
     "FCl2vsCol.R",
+    "LCR.R",
     "Metals.R",
     "TOC.R",
     "VOCs.R",
@@ -27,6 +28,7 @@ files = [
     "datacleaner.R",
     "dbps.R",
     "fn1.R",
+    "fn2.R",
     "nit.R",
     "overarching.R",
     "pH_Ortho.R",
@@ -66,6 +68,8 @@ files = [
     "/variable_assignment.R",
     "/vcs.R",
     "/VOCs.R",
+    "/fn2.R",
+    "/LCR.R",
 ]
 validate = true
 product_type = "connect"
@@ -6080,9 +6084,4 @@ needs_compilation = "yes"
 author = "Achim Zeileis [aut, cre] (ORCID: <https://orcid.org/0000-0003-0918-3766>), Gabor Grothendieck [aut], Jeffrey A. Ryan [aut], Joshua M. Ulrich [ctb], Felix Andrews [ctb]"
 maintainer = "Achim Zeileis <Achim.Zeileis@R-project.org>"
 repository = "CRAN"
-
-[deployment_error]
-code = "deployedContentNotRunning"
-message = "Deployed content does not appear to be running. Check the deployment logs for more information."
-operation = "publish"
 
