@@ -8,10 +8,10 @@ library(stringr)
 library(blastula)
 # #
 #
-source("variables.R")
-source("fn1.R")
-source("variable_assignment.R")
-source("overarching.R")
+# source("variables.R")
+# source("fn1.R")
+# source("variable_assignment.R")
+# source("overarching.R")
 # 
 # 
 # FCl2vsCol <- function(x,y) {
@@ -105,5 +105,5 @@ fcl2vscol <- function(x,y,z) {
 }
 
 
-check2 <- fcl2vscol("August", 2023, "Field-Chlorine Residual Total")
+# check2 <- fcl2vscol("August", 2023, "Field-Chlorine Residual Total")
 

@@ -21,7 +21,7 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
     parameter = my_param,
     site = my_site,
     sample_class = samp_class,
-    select_additional = c("METHOD_USED", "ANALYZED_ON", "ANALYZED_BY", "VALIDATED_ON")
+    select_additional = c("METHOD_USED", "ANALYZED_ON", "ANALYZED_BY", "VALIDATED_ON", "TRESULT")
   ) %>% 
     separate(date_time, into = c("SampDate", "SampTime"), sep = " ") %>%
     separate(ANALYZED_ON, into = c("AnalDate", "AnalTime"), sep = " ")%>%  
@@ -75,7 +75,7 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
              ),
            Result = ifelse(grepl("^<", result_as_entered), 0, result_as_entered),
            Site2 = ifelse(grepl("*U", site), str_remove(site, "U$"), ifelse(grepl("*D", site), str_remove(site, "D$"), site))) %>%
-    filter(!is.na(result),
+    filter(#!is.na(result),
            sample_type == "Grab",
            # grepl("*ConLab*", ANALYZED_BY)==F
            )

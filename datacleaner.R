@@ -23,8 +23,9 @@
 
 table_clean <- function(x,y,z) {
   df <- table_generator(x,y,z) %>% filter(grepl("*ConLab*", ANALYZED_BY)==F,
-                                          !is.na(VALIDATED_ON)) %>% 
-    subset(select = -c(site, parameter, ANALYZED_BY, VALIDATED_ON))
+                                          !is.na(VALIDATED_ON),
+                                        !isna(Result)) %>% 
+    subset(select = -c(site, parameter, ANALYZED_BY, VALIDATED_ON, TRESULT))
   
   
 }

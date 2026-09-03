@@ -157,7 +157,7 @@ text2output <- function(x) {
             "**Method 103 (SM 3112-B) could be used for Mercury if Mercury is analyzed by the contract lab.",
             "\n",
             "Samples may be analyzed by contract labs or PWD labs."),
-            ifelse(x %in% c("Nitrite", "Nitrate"), paste0(
+            ifelse(x %in% c("Nitrite/Nitrate"), paste0(
               "SDWA4",
               "\n",
               "Sampling/Reporting Frequency:",
@@ -174,7 +174,7 @@ text2output <- function(x) {
               "\n", {'\t'},
               toString(hs_sites),
               "\n",
-              "Expected total samples: 3",
+              "Expected total samples: 3 per parameter(6 total)",
               "\n",
               "Sample Type:",
               "\n", {'\t'},

@@ -1,29 +1,29 @@
-# library(tidyverse)
-# library(wqr)
-# library(kableExtra)
-# library(rmarkdown)
-# library(knitr)
-# library(lubridate)
-# library(stringr)
-# library(blastula)
+library(tidyverse)
+library(wqr)
+library(kableExtra)
+library(rmarkdown)
+library(knitr)
+library(lubridate)
+library(stringr)
+library(blastula)
 
 
-# source("variables.R")
-# source("fn1.R")
-# source("variable_assignment.R")
-# source("nit.R")
-# source("cl2_col.R")
-# source("vcs.R")
-# source("dbps.R")
-# source("secondaries.R")
-# source("TOC.R")
-# source("Metals.R")
-# source("VOCs.R")
-# source("pH_Ortho.R")
-# source("LCR.R")
+source("variables.R")
+source("fn1.R")
+source("variable_assignment.R")
+source("nit.R")
+source("cl2_col.R")
+source("vcs.R")
+source("dbps.R")
+source("secondaries.R")
+source("TOC.R")
+source("Metals.R")
+source("VOCs.R")
+source("pH_Ortho.R")
+source("LCR.R")
 
 table_generator <- function(x,y,z) {
-  if(z %in% c("Nitrite", "Nitrate")) {
+  if(z %in% c("Nitrite/Nitrate")) {
     df3 <- table_generator_nit(x,y,z)
   }else{
     if(z %in% c("Field-Chlorine Residual Total", "Coliforms Total (Colilert)")){
@@ -63,4 +63,4 @@ table_generator <- function(x,y,z) {
     }
   }
 }
-#quick_check <- table_generator("Quarter 4", 2021, "TOC")
+quick_check <- table_generator("January", 2025, "THMs")
