@@ -1,5 +1,5 @@
 
-source("variables.R")
+# source("variables.R")
 
 
 
@@ -130,7 +130,7 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
 }
 
 
- #check1 <- fn1(c("Lead","Copper"),"2025-06-01","2025-07-01",c(), "Lead/Copper")
+ check1 <- fn1(c("Lead","Copper"),"2025-06-01","2025-07-01",c(), "Lead/Copper")
 # check <- fn1("Violation Check Samples", "2024-06-01", "2024-07-01", drr_sites, "Violation Check Samples")
 #check <- fn1("Nitrite", "2023-06-01", "2023-07-01", c(4001, 5004, 6001), "Routine Daily")
 # check <- fn1("5 Haloacetic Acids", "2024-01-01", "2024-02-01", dbp_sites, c("Routine Daily", "THMs/HAAs Monthly"))

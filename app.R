@@ -16,6 +16,7 @@ source("datacleaner.R")
 source("text2output.R")
 source("FCl2vsCol.R")
 source("LCR.R")
+source("fn2.R")
 
 
 
@@ -137,6 +138,20 @@ server <- function(input, output, session) {
     fcl2vscol(input$month, input$year, input$parameter)
   })
 
+  missing_method <- eventReactive(input$Submit,{
+    req(input$month)
+    req(input$year)
+    req(input$parameter)
+    variable_assignment(input$month, input$year, input$parameter)
+
+
+    if (!exists("z")) {
+  z <- input$parameter
+}
+
+
+    fn2(z,st,en,si,sc)
+  })
 
     output$table <- renderDT({
 
@@ -211,7 +226,10 @@ table3 <- eventReactive(input$Submit,{
              ),
              ifelse("Coliforms Total (Colilert)" %in% table3()$parameter, paste0("\n", "Coliform Positives: ", length(table3()$Result[which(table3()$Result != 0 & table3()$parameter == "Coliforms Total (Colilert)")])), ifelse(
                "Field-Chlorine Residual Total" %in% table3()$parameter, paste0("\n", "FCl2 Samples less than 0.14 mg/L: ", length(table3()$Result[which(table3()$Result < 0.14 & table3()$parameter == "Field-Chlorine Residual Total")])),""
-             ))
+             )),
+             "\n",
+             "Missing Methods: ",
+             missing_method()
     )
     )
 
