@@ -31,9 +31,10 @@ variable_assignment <- function(x,y,z){
   )
 
   
-  if(z %in% c("Nitrite", "Nitrate")){
+  if(z %in% c("Nitrite/Nitrate")){
     assign("si", hs_sites, envir = parent.frame())
     assign("sc", "Routine Daily", envir = parent.frame())
+    assign("z", c("Nitrite", "Nitrate"), envir = parent.frame())
   }else(
     if(z %in% c("Field-Chlorine Residual Total", "Coliforms Total (Colilert)")){
       assign("si", drr_sites, envir = parent.frame())
@@ -113,7 +114,7 @@ variable_assignment <- function(x,y,z){
 
 
 
-# variable_assignment("Quarter 1", 2023, "TOC")
+# variable_assignment("January", 2026, "Nitrite/Nitrate")
 
 #check <- variable_assignment("Solids Dissolved Total")
 # variable_assignment("Secondaries")

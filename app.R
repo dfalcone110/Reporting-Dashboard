@@ -16,6 +16,7 @@ source("datacleaner.R")
 source("text2output.R")
 source("FCl2vsCol.R")
 source("LCR.R")
+source("fn2.R")
 
 
 
@@ -32,7 +33,7 @@ theme = shinythemes::shinytheme("sandstone"),
                  sidebarPanel(width = 3,
                    selectInput("parameter",
                                label = "Parameter",
-                               choices = sort(c("Nitrite", "Nitrate", "Field-Chlorine Residual Total", "Coliforms Total (Colilert)", "Violation Check Samples", "HAAs", "THMs", "Secondaries", "TOC", "TOC & Alkalinity", "Metals", "VOCs", "Orthophosphate & pH", "LCR"))),
+                               choices = sort(c("Nitrite/Nitrate", "Field-Chlorine Residual Total", "Coliforms Total (Colilert)", "Violation Check Samples", "HAAs", "THMs", "Secondaries", "TOC", "TOC & Alkalinity", "Metals", "VOCs", "Orthophosphate & pH", "LCR"))),
                    selectInput("month", 
                                label = "Month", 
                                choices = c("January","February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December", "Quarter 1", "Quarter 2", "Quarter 3", "Quarter 4")),
@@ -124,8 +125,9 @@ server <- function(input, output, session) {
     req(input$parameter)
     table_generator(input$month, input$year, input$parameter)%>% mutate(
       contract_lab = ifelse(grepl("*ConLab*", ANALYZED_BY), TRUE, FALSE),
-      not_validated = ifelse(is.na(VALIDATED_ON), TRUE ,FALSE)
-    ) %>% subset(select=-c(VALIDATED_ON, ANALYZED_BY)) %>% arrange(AnalDate, `Loc/EPID`,SampType) 
+      not_validated = ifelse(is.na(VALIDATED_ON), TRUE ,FALSE),
+      qualifier = ifelse(!is.na(TRESULT), TRUE, FALSE)
+    ) %>% subset(select=-c(VALIDATED_ON, ANALYZED_BY, TRESULT)) %>% arrange(AnalDate, `Loc/EPID`,SampType) 
   })
   
 
@@ -136,10 +138,24 @@ server <- function(input, output, session) {
     fcl2vscol(input$month, input$year, input$parameter)
   })
 
+  missing_method <- eventReactive(input$Submit,{
+    req(input$month)
+    req(input$year)
+    req(input$parameter)
+    variable_assignment(input$month, input$year, input$parameter)
+
+
+    if (!exists("z")) {
+  z <- input$parameter
+}
+
+
+    fn2(z,st,en,si,sc)
+  })
 
     output$table <- renderDT({
 
-       df <- table()
+       df <- table()%>% filter(!is.na(Result))
        df <- datatable(df, options = list(iDisplayLength = 50, dom = 'pl')) %>% formatStyle(
          'contract_lab',
          target = 'row',
@@ -173,33 +189,47 @@ server <- function(input, output, session) {
       if (input$summaryinput == "Site") {
         table2 <- table() %>% group_by(site, `Loc/EPID`) %>% summarise(`Number of Samples` = n(),
                                                                                                         `Contract Samples` = sum(contract_lab == TRUE),
-                                                                                                        `Analysis.Methods` = paste(unique(AnalMeth), collapse = " ")) %>% rename("Loc.EPID" = `Loc/EPID`)
+                                                                                                        `Analysis.Methods` = paste(unique(AnalMeth), collapse = " "),
+                                                                                                        `Data Qualifiers` = sum(qualifier == TRUE)) %>% rename("Loc.EPID" = `Loc/EPID`)
       } else {if (input$summaryinput == "Parameter") {
         table2 <- table() %>% group_by(parameter) %>% summarise(`Number of Samples` = n(),
                                                                        `Contract Samples` = sum(contract_lab == TRUE),
-                                                                       `Analysis.Methods` = paste(unique(AnalMeth), collapse = " "))
+                                                                       `Analysis.Methods` = paste(unique(AnalMeth), collapse = " "),
+                                                                      `Data Qualifiers` = sum(qualifier == TRUE))
         }}
 
     )
     
+table3 <- eventReactive(input$Submit,{
 
+    req(input$month)
+    req(input$year)
+    req(input$parameter)
+  
+  table() %>% filter(!is.na(Result))
+  
+})
 
     output$text <- renderText(
+       
       paste0("Total Samples Taken: ", 
-             as.character(length(table()$Result)), 
+             as.character(length(table3()$Result)), 
              "\n", 
              "Samples Analyzed by Contract Lab: ",
-             as.character(sum(table()$contract_lab == TRUE)),
+             as.character(sum(table3()$contract_lab == TRUE)),
              "\n",
              
              "Samples Validated: ",
-             as.character(sum(table()$not_validated == FALSE)),
+             as.character(sum(table3()$not_validated == FALSE)),
              
-             ifelse("Coliforms Total (Colilert)" %in% table()$parameter, paste0("\n", "Coliform Results Without Matching Cl2: ", lms()), ifelse("Field-Chlorine Residual Total" %in% table()$parameter, paste0("\n", "FCl2 Results Without Matching Coliforms: ", lms()),"")
+             ifelse("Coliforms Total (Colilert)" %in% table3()$parameter, paste0("\n", "Coliform Results Without Matching Cl2: ", lms()), ifelse("Field-Chlorine Residual Total" %in% table3()$parameter, paste0("\n", "FCl2 Results Without Matching Coliforms: ", lms()),"")
              ),
-             ifelse("Coliforms Total (Colilert)" %in% table()$parameter, paste0("\n", "Coliform Positives: ", length(table()$Result[which(table()$Result != 0 & table()$parameter == "Coliforms Total (Colilert)")])), ifelse(
-               "Field-Chlorine Residual Total" %in% table()$parameter, paste0("\n", "FCl2 Samples less than 0.14 mg/L: ", length(table()$Result[which(table()$Result < 0.14 & table()$parameter == "Field-Chlorine Residual Total")])),""
-             ))
+             ifelse("Coliforms Total (Colilert)" %in% table3()$parameter, paste0("\n", "Coliform Positives: ", length(table3()$Result[which(table3()$Result != 0 & table3()$parameter == "Coliforms Total (Colilert)")])), ifelse(
+               "Field-Chlorine Residual Total" %in% table3()$parameter, paste0("\n", "FCl2 Samples less than 0.14 mg/L: ", length(table3()$Result[which(table3()$Result < 0.14 & table3()$parameter == "Field-Chlorine Residual Total")])),""
+             )),
+             "\n",
+             "Missing Methods: ",
+             missing_method()
     )
     )
 

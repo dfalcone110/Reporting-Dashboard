@@ -67,3 +67,15 @@ check <- function(x,y){
 # year <- merge(year, check23_vcs, all.x = T) %>% mutate(count_vcs = ifelse(is.na(count_vcs), 0, count_vcs)) %>% mutate(total_cl2 = count_cl2 + count_vcs,
 #                                                                                                                       total_col = count_col + count_vcs)
 
+
+
+
+check <- read_LIMS(
+  start_date = "2025-01-01",
+  end_date = "2025-02-01",
+  parameter = c("Total THMs", "Bromoform","Bromodichloromethane", "Dibromochloromethane", "Chloroform"),
+  site = dbp_sites,
+  select_additional = c("METHOD_USED", "TRESULT")
+) %>% group_by(parameter) %>% 
+  summarise(count = sum(!is.na(TRESULT)),
+count2 = sum(is.na(TRESULT)))

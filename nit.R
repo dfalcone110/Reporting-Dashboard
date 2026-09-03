@@ -69,10 +69,10 @@ table_generator_nit <- function(x,y,z) {
     ) %>% 
     rename(`Loc/EPID`="padep_id", `Sample #` = "lims_number", Contam = "Contam.Code", AnalMeth = "Method.Code"
     ) %>% 
-    select(site, parameter, PWSID, Transcode, Contam, AnalMeth, Result, LLD, CE, AnalDate, `Loc/EPID`, `Location 2`, SampDate,SampType, SampTime, LabID, blank1, blank2,  `Sender ID`, `Sample #`, blank3, blank4, ANALYZED_BY, VALIDATED_ON ) %>% 
+    select(site, parameter, PWSID, Transcode, Contam, AnalMeth, Result, LLD, CE, AnalDate, `Loc/EPID`, `Location 2`, SampDate,SampType, SampTime, LabID, blank1, blank2,  `Sender ID`, `Sample #`, blank3, blank4, ANALYZED_BY, VALIDATED_ON, TRESULT ) %>% 
     mutate(across(everything(), as.character))
   return(df2)
 }
 # 
-# check1 <- table_generator_nit("December", 2023, "Nitrite")
+# check1 <- table_generator_nit("January", 2026, "Nitrite/Nitrate")
 # check2 <- table_generator_nit("December", 2023, "Nitrate")

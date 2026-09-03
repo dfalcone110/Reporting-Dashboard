@@ -7,7 +7,7 @@
 
   #DBP filters by pn (project number) instead of sample class, DBPS has a separate calculation done on result
 
-fn1 <- function(my_param, st, en, my_site, samp_class){
+fn2 <- function(my_param, st, en, my_site, samp_class){
   #alternate code for using same inputs as outer function and calling the below variables into inner funtion-----
   # my_month <- get("my_month", parent.frame())
   # sc <- get("sc", parent.frame())
@@ -78,7 +78,7 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
     filter(#!is.na(result),
            sample_type == "Grab",
            # grepl("*ConLab*", ANALYZED_BY)==F
-           )
+           ) 
 
 
 
@@ -117,46 +117,12 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
       )
     )) 
   )
+
+  df2 <- df2 %>% mutate(METHOD_USED = ifelse(parameter == "Lead", "hey", METHOD_USED))
   
-  
-   if(!is.null(samp_class) & "Lead/Copper" %in% samp_class){
-    df2 <- df2 %>%  merge(contaminant_codes, by.x = c("parameter" ,"METHOD_USED"), by.y = c("Contaminant", "LIMS_method"), no.dups = T) %>% mutate(padep_id = str_remove(site,"LC-"))
-    }else(
-      df2 <- df2%>%
-        merge(df, by.x = "Site2", by.y = "loc_id")%>%
-        merge(contaminant_codes, by.x = c("parameter" ,"METHOD_USED"), by.y = c("Contaminant", "LIMS_method"), no.dups = T)
-      
-    )
+  missing_method <- unique(setdiff(df2$METHOD_USED, contaminant_codes$LIMS_method))
+
+  return(missing_method)
 }
 
-
- check1 <- fn1(c("Lead","Copper"),"2025-06-01","2025-07-01",c(), "Lead/Copper")
-# check <- fn1("Violation Check Samples", "2024-06-01", "2024-07-01", drr_sites, "Violation Check Samples")
-#check <- fn1("Nitrite", "2023-06-01", "2023-07-01", c(4001, 5004, 6001), "Routine Daily")
-# check <- fn1("5 Haloacetic Acids", "2024-01-01", "2024-02-01", dbp_sites, c("Routine Daily", "THMs/HAAs Monthly"))
-
-# fl <- "SM 4500-F-C"
-# orth <- "SM 4500 P E"
-# hey <- "hello"
-# test1 <- grepl("*10-204*", fl)
-# test2 <- grepl("*F", orth)
-# 
-# x <- "300.7"
-# x <- "10-204"
-# x <- "SM 4500-H+ B"
-# 
-# y <- ifelse(str_detect(x, "4500") == T & str_detect(x, "H"), "True", "False")
-
-# check2 <- read_LIMS(
-#   start_date = "2018-12-01",
-#   end_date = "2024-01-01",
-#   parameter = c( c("Total THMs", "Bromoform","Bromodichloromethane", "Dibromochloromethane", "Chloroform"), c("5 Haloacetic acids", "Dibromoacetic acid", "Dichloroacetic acid", "Bromoacetic acid", "Chloroacetic acid", "Trichloroacetic acid" )),
-#   project_no = "THM_HAA Monthly",
-#   select_additional = additional
-# )
-
-
-# random <- read_LIMS(start_date = "2019-01-01",
-#                     end_date = Sys.Date(),
-#                     parameter = c(ioc_params, secondaries, soc_params, voc_params, metals, "pH", "Field-pH"),
-#                     select_additional = "METHOD_USED") %>% filter(str_detect(METHOD_USED, "8156") ==T )
+#check2 <- fn2(c("Lead","Copper"),"2025-06-01","2025-07-01",c(), "Lead/Copper")
