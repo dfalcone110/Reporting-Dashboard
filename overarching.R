@@ -8,18 +8,19 @@
 # library(blastula)
 
 
-source("variables.R")
-source("fn1.R")
-source("variable_assignment.R")
-source("nit.R")
-source("cl2_col.R")
-source("vcs.R")
-source("dbps.R")
-source("secondaries.R")
-source("TOC.R")
-source("Metals.R")
-source("VOCs.R")
-source("pH_Ortho.R")
+# source("variables.R")
+# source("fn1.R")
+# source("variable_assignment.R")
+# source("nit.R")
+# source("cl2_col.R")
+# source("vcs.R")
+# source("dbps.R")
+# source("secondaries.R")
+# source("TOC.R")
+# source("Metals.R")
+# source("VOCs.R")
+# source("pH_Ortho.R")
+# source("LCR.R")
 
 table_generator <- function(x,y,z) {
   if(z %in% c("Nitrite", "Nitrate")) {
@@ -48,6 +49,10 @@ table_generator <- function(x,y,z) {
                 } else{
                   if(z == "Orthophosphate & pH"){
                     df3 <- table_generator_ortho(x,y,z)
+                  }else{
+                    if( z == "LCR"){
+                      df3 <- table_generator_lcr(x,y,z)
+                    }
                   }
                 }
               }

@@ -81,6 +81,7 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
            )
 
 
+
   df2 <- df2 %>% mutate(
     METHOD_USED = ifelse(str_detect(df2$METHOD_USED, "9223"),  "SM 9223 Colilert", ifelse(
       str_detect(df2$METHOD_USED, "524.2"), "EPA 524.2 rev 4.1", ifelse(
@@ -115,13 +116,21 @@ fn1 <- function(my_param, st, en, my_site, samp_class){
         )
       )
     )) 
-  )%>%
-  merge(df, by.x = "Site2", by.y = "loc_id")%>%
-  merge(contaminant_codes, by.x = c("parameter" ,"METHOD_USED"), by.y = c("Contaminant", "LIMS_method"), no.dups = T)
+  )
+  
+  
+   if(!is.null(samp_class) & "Lead/Copper" %in% samp_class){
+    df2 <- df2 %>%  merge(contaminant_codes, by.x = c("parameter" ,"METHOD_USED"), by.y = c("Contaminant", "LIMS_method"), no.dups = T) %>% mutate(padep_id = str_remove(site,"LC-"))
+    }else(
+      df2 <- df2%>%
+        merge(df, by.x = "Site2", by.y = "loc_id")%>%
+        merge(contaminant_codes, by.x = c("parameter" ,"METHOD_USED"), by.y = c("Contaminant", "LIMS_method"), no.dups = T)
+      
+    )
 }
 
 
-# 
+ #check1 <- fn1(c("Lead","Copper"),"2025-06-01","2025-07-01",c(), "Lead/Copper")
 # check <- fn1("Violation Check Samples", "2024-06-01", "2024-07-01", drr_sites, "Violation Check Samples")
 #check <- fn1("Nitrite", "2023-06-01", "2023-07-01", c(4001, 5004, 6001), "Routine Daily")
 # check <- fn1("5 Haloacetic Acids", "2024-01-01", "2024-02-01", dbp_sites, c("Routine Daily", "THMs/HAAs Monthly"))
