@@ -10,9 +10,9 @@ id = "b8149a1d-92f4-4417-a652-d444b75ea811"
 dashboard_url = "https://pwdrstudio.phila.gov/connect/#/apps/b8149a1d-92f4-4417-a652-d444b75ea811"
 direct_url = "https://pwdrstudio.phila.gov/content/b8149a1d-92f4-4417-a652-d444b75ea811/"
 logs_url = "https://pwdrstudio.phila.gov/connect/#/apps/b8149a1d-92f4-4417-a652-d444b75ea811/logs"
-deployed_at = "2026-09-03T18:57:04.392Z"
-bundle_id = "4688"
-bundle_url = "https://pwdrstudio.phila.gov/__api__/v1/content/b8149a1d-92f4-4417-a652-d444b75ea811/bundles/4688/download"
+deployed_at = "2026-09-03T19:04:41.546Z"
+bundle_id = "4689"
+bundle_url = "https://pwdrstudio.phila.gov/__api__/v1/content/b8149a1d-92f4-4417-a652-d444b75ea811/bundles/4689/download"
 files = [
     ".posit/publish/Reporting Dashboard-G3HL.toml",
     ".posit/publish/deployments/deployment-21C6.toml",

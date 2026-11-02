@@ -1,11 +1,11 @@
-library(tidyverse)
-library(wqr)
-library(kableExtra)
-library(rmarkdown)
-library(knitr)
-library(lubridate)
-library(stringr)
-library(blastula)
+# library(tidyverse)
+# library(wqr)
+# library(kableExtra)
+# library(rmarkdown)
+# library(knitr)
+# library(lubridate)
+# library(stringr)
+# library(blastula)
 
 
 # source("variables.R")
@@ -69,13 +69,14 @@ check <- function(x,y){
 
 
 
+# secondaries <- c("Chloride", "Iron", "Sulfate", 
+#                  "Solids Dissolved Total", "Manganese",
+#                  "Silver", "Color Apparent")
 
-check <- read_LIMS(
-  start_date = "2025-01-01",
-  end_date = "2025-02-01",
-  parameter = c("Total THMs", "Bromoform","Bromodichloromethane", "Dibromochloromethane", "Chloroform"),
-  site = dbp_sites,
-  select_additional = c("METHOD_USED", "TRESULT")
-) %>% group_by(parameter) %>% 
-  summarise(count = sum(!is.na(TRESULT)),
-count2 = sum(is.na(TRESULT)))
+# check <- read_LIMS(
+#   start_date = "2026-07-01",
+#   end_date = "2026-08-01",
+#   parameter = "Field-Chlorine Residual Total",
+#   site = drr_sites,
+#   select_additional = c("METHOD_USED", "TRESULT")
+# ) 

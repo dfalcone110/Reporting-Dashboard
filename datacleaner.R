@@ -8,28 +8,33 @@
 # library(blastula)
 
 
-# source("variables.R")
-# source("fn1.R")
-# source("variable_assignment.R")
-# source("nit.R")
-# source("cl2_col.R")
-# source("vcs.R")
-# source("dbps.R")
-# source("secondaries.R")
-# source("TOC.R")
-# source("Metals.R")
-# source("VOCs.R")
-# source("pH_Ortho.R")
+source("variables.R")
+source("fn1.R")
+source("variable_assignment.R")
+source("nit.R")
+source("cl2_col.R")
+source("vcs.R")
+source("dbps.R")
+source("secondaries.R")
+source("TOC.R")
+source("Metals.R")
+source("VOCs.R")
+source("pH_Ortho.R")
+source("overarching.R")
 
 table_clean <- function(x,y,z) {
-  df <- table_generator(x,y,z) %>% filter(grepl("*ConLab*", ANALYZED_BY)==F,
-                                          !is.na(VALIDATED_ON),
-                                        !is.na(Result)) %>% 
-    subset(select = -c(site, parameter, ANALYZED_BY, VALIDATED_ON, TRESULT))
+  df <- table_generator(x,y,z) %>% 
+    filter(grepl("*ConLab*", ANALYZED_BY)==F,
+  !Result %in% c("NR", "NS", "NM"),
+  !is.na(VALIDATED_ON),
+  !is.na(Result)
+  ) %>% select(-c(site, parameter, ANALYZED_BY, VALIDATED_ON, TRESULT))
   
   
 }
-#quick_check <- table_generator("Quarter 4", 2021, "TOC")
+# quick_check <- table_clean("September", 2026, "Nitrite/Nitrate")
+
+
 
 # check <- read_LIMS(
 #   start_date = "2024-01-01",
